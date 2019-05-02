@@ -1,0 +1,12 @@
+### Kubernetes Nodes Details ###
+kubeControllers=(kube-master01)
+kubeWorkers=(kube-worker01 kube-worker02)
+kubePublicIP=(10.74.255.110)
+### Kubernetes Default Configs ###
+kubeCertPath=/tmp/certs
+### Kubernetes Certificates Details ###
+C=IN
+L=DELHI
+O=DevOps
+OU=ENG
+ST=NEWDELHI
