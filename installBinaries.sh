@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 function _installBinaries() {
   if [ ! -f /tmp/cfssl_linux-amd64 ]; then
