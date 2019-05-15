@@ -27,9 +27,9 @@ function __generateKubeConfigs() {
 		
 		if [ ! -f "${worker}.kubeconfig" ]; then
 			echo "Failed to generate kubernetes ${worker}.kubeconfig"
-			exit -1
+			exit 1
 		fi
-
+		echo ""
 		scp ${worker}.kubeconfig kube-proxy.kubeconfig root@${worker}:~/
 	done
 
@@ -54,8 +54,9 @@ function __generateKubeConfigs() {
 	kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 	if [ ! -f "./kube-proxy.kubeconfig" ]; then
 		echo "Failed to generate kubernetes kube-proxy.kubeconfig"
-		exit -1
+		exit 1
 	fi
+	echo ""
 
 	echo "Generating KubeController Configs"
 	kubectl config set-cluster kubernetes-the-hard-way \
@@ -78,9 +79,10 @@ function __generateKubeConfigs() {
 	kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconfig
 	if [ ! -f "./kube-controller-manager.kubeconfig" ]; then
 		echo "Failed to generate kubernetes kube-controller-manager.kubeconfig"
-		exit -1
+		exit 1
 	fi
-		
+	echo ""
+
 	echo "Generating KubeScheduler Configs"
 	kubectl config set-cluster kubernetes-the-hard-way \
 		--certificate-authority=ca.pem \
@@ -102,8 +104,9 @@ function __generateKubeConfigs() {
 	kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
 	if [ ! -f "./kube-scheduler.kubeconfig" ]; then
 		echo "Failed to generate kubernetes kube-scheduler.kubeconfig"
-		exit -1
+		exit 1
 	fi
+	echo ""
 
 	echo "Generating Kubernetes Admin Configs"
 	kubectl config set-cluster kubernetes-the-hard-way \
@@ -127,10 +130,11 @@ function __generateKubeConfigs() {
 
 	if [ ! -f "./admin.kubeconfig" ]; then
 		echo "Failed to generate kubernetes admin.kubeconfig"
-		exit -1
+		exit 1
 	fi
-
+	echo ""
 	echo "Config files have been sucessfully generated!!"
+	echo ""
 	return $?
 }
 
@@ -140,9 +144,10 @@ function __distributeKubeWorkerConfigs() {
 		scp ${worker}.kubeconfig kube-proxy.kubeconfig root@${worker}:~/
 		if [ $? -ne 0 ]; then
 			echo "Failed to copy configs to ${worker} node"
-			exit -1
+			exit 1
 		fi
   	done
+  	echo ""
   	return $?
 }
 
@@ -163,8 +168,9 @@ resources:
 EOF
 	if [ ! -f "./encryption-config.yaml" ]; then
 		echo "Failed to generate encryption-config.yaml"
-		exit -1
+		exit 1
 	fi
+	echo ""
 	return $?
 }
 
@@ -174,9 +180,10 @@ function __distributeKubeMasterConfigs() {
 		scp ./encryption-config.yaml ./admin.kubeconfig ./kube-controller-manager.kubeconfig ./kube-scheduler.kubeconfig root${controller}:~/
 		if [ $? -ne 0 ]; then
 			echo "Failed to copy configs to ${controller} node"
-			exit -1
+			exit 1
 		fi
  	done
+ 	echo ""
  	return $?
 }
 

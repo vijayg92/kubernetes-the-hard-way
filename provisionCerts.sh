@@ -9,6 +9,7 @@ function __provisionCACerts() {
       '{"CN": "Kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": $O,"OU": $OU,"ST": $ST}]}' > ca-csr.json
 
   cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+  echo ""
   return $?
 }
 
@@ -23,6 +24,7 @@ function __provisionAdminCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./admin-csr.json | cfssljson -bare admin
+  echo ""
   return $?
 }
 
@@ -37,6 +39,7 @@ function __provisionControllerCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+  echo ""
   return $?
 }
 
@@ -51,6 +54,7 @@ function __provisionProxyClientCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-proxy-csr.json | cfssljson -bare kube-proxy
+  echo ""
   return $?
 }
 
@@ -65,6 +69,7 @@ function __provisionSchedulerCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+  echo ""
   return $?
 }
 
@@ -80,7 +85,7 @@ function __provisionAPICerts() {
     -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,${kubePublicIP},127.0.0.1,kubernetes.default \
     -profile=kubernetes \
     ./kubernetes-csr.json | cfssljson -bare kubernetes
-
+  echo ""
   return $?
 }
 
@@ -88,7 +93,7 @@ function __provisionSAKey() {
   echo "Provisioning Kubernetes Service Account Key"
   jq -n --arg C $C --arg L $L --arg ST $ST \
       '{"CN": "service-accounts","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > service-account-csr.json
-
+  echo ""
   cfssl gencert \
     -ca=./ca.pem \
     -ca-key=./ca-key.pem \
@@ -112,6 +117,7 @@ function __provisionClientCerts() {
       -profile=kubernetes \
       ${worker}-csr.json | cfssljson -bare ${worker}
   done
+  echo ""
   return $?
 }
 

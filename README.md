@@ -14,7 +14,7 @@
 
 ## Usage
 1. `clusterConfigs.txt`: *Stores Kubernetes Cluster Configurations*
-2. `initialCheck.sh`:  *Script to run initial checks*
+2. `checkPrerequisites.sh`:  *Script to run initial checks*
 3. `installBinaries.sh`: *Installs all the required binaries.*
 4. `provisionCerts.sh` : *Provisions of all the required certificates.*
 5. `generateKubeConfigs.sh`: *Generates all the required Kubernetes Configuration files.*
@@ -22,7 +22,7 @@
 7. `bootstrapEtcd.sh`: *Bootstraps ETCD cluster.*
 8. `bootstrapWorkerNodes.sh`: *Bootstraps Kubernetes nodes.*
 9. `validateCluster.sh`: *Validate deployment of the cluster.*
-10. `deploy_kubernetes_the_hardway.sh`: *This is the main script which sequentially performs all the above steps to deploy the cluster in a hard way.*
+10. `deployKubernetesTheHardway.sh`: *This is the main script which sequentially performs all the above steps to deploy the cluster in a hard way.*
 ## Installation
 
 1. Clone the repository -
@@ -31,13 +31,13 @@
 git clone https://github.com/vijayg92/kubernetes-the-hard-way.git
 cd kubernetes-the-hard-way
 ```
-2. Run `initialCheck.sh` script to validate prerequisites.
+2. Run `checkPrerequisites.sh` script to validate prerequisites.
 ```bash
-./initialCheck.sh
+./checkPrerequisites.sh
 ```
 3. If step 2 works fine then deploy the cluster by running `deploy_kubernetes_the_hard_way.sh` script
 ```bash
-./deploy_kubernetes_the_hard_way.sh
+./deployKubernetesTheHardway.sh
 ```
 4. Finally validation the cluster.
 

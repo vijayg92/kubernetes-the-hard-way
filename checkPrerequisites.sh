@@ -13,13 +13,15 @@ function main() {
       echo "Error - Kindly run this script from the local host ${hostMachine}"
       exit 1
   fi
+  echo ""
 
   echo "Validation Kubernetes Certificate Path"
   if [ ! -d ${KubeConfigTempPath} ]; then
     mkdir -p ${KubeConfigTempPath}
     cd ${KubeConfigTempPath}
   fi
-
+  echo ""
+  
   for worker in "${kubeWorkers[@]}"; do
     echo "Trying to connect to Kubernetes ${worker} Node"
     ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -f' &>/dev/null
@@ -28,6 +30,7 @@ function main() {
       exit 1
     fi
     echo "Connection Succeeded"
+    echo ""
   done
 
   for controller in "${kubeControllers[@]}"; do
@@ -39,6 +42,6 @@ function main() {
     fi
     echo "Connection Succeeded"
   done
-
+  echo ""
   return $?
 }
