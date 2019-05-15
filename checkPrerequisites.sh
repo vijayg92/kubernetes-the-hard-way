@@ -1,22 +1,31 @@
 #!/bin/bash
+set -e
 
-function _checkPrerequisites() {
+function main() {
 
   rpm --query wget || yum install -y wget
   rpm --query jq || yum install -y jq
 
   source ./clusterConfigs.txt
+
+  echo "Validating Host Machine Details"
+  if [ `hostname -f` != "${hostMachine}" ]; then
+      echo "Error - Kindly run this script from the local host ${hostMachine}"
+      exit 1
+  fi
+
   echo "Validation Kubernetes Certificate Path"
-  if [ ! -d ${kubeCertPath} ]; then
-    mkdir -p ${kubeCertPath}
-    cd ${kubeCertPath}
+  if [ ! -d ${KubeConfigTempPath} ]; then
+    mkdir -p ${KubeConfigTempPath}
+    cd ${KubeConfigTempPath}
   fi
 
   for worker in "${kubeWorkers[@]}"; do
     echo "Trying to connect to Kubernetes ${worker} Node"
     ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -f' &>/dev/null
     if [ "$?" -ne 0 ]; then
-      echo "Unable to connect to ${worker}"; exit 1
+      echo "Unable to connect to ${worker}"
+      exit 1
     fi
     echo "Connection Succeeded"
   done
@@ -25,7 +34,8 @@ function _checkPrerequisites() {
     echo "Trying to connect to Kubernetes ${controller} Node"
     ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${controller} 'hostname -f' &>/dev/null
     if [ "$?" -ne 0 ]; then
-      echo "Unable to connect to ${controller}"; exit 1
+      echo "Unable to connect to ${controller}"
+      exit 1
     fi
     echo "Connection Succeeded"
   done

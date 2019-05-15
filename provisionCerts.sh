@@ -1,20 +1,21 @@
 #!/bin/bash
+set -e
 
 function __provisionCACerts() {
   echo "Provisioning Kubernetes CA Certificates"
-  jq -n '{"signing": {"default": {"expiry": "8760h"},"profiles": {"kubernetes": {"usages": ["signing", "key encipherment", "server auth", "client auth"],"expiry": "8760h"}}}}' > ${kubeCertPath}/ca-config.json
+  jq -n '{"signing": {"default": {"expiry": "8760h"},"profiles": {"kubernetes": {"usages": ["signing", "key encipherment", "server auth", "client auth"],"expiry": "8760h"}}}}' > ca-config.json
 
   jq -n --arg C $C --arg L $L --arg O $O --arg OU $OU --arg ST $ST \
-      '{"CN": "Kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": $O,"OU": $OU,"ST": $ST}]}' > ${kubeCertPath}/ca-csr.json
+      '{"CN": "Kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": $O,"OU": $OU,"ST": $ST}]}' > ca-csr.json
 
-  cfssl gencert -initca ./ca-csr.json | cfssljson -bare ca
+  cfssl gencert -initca ca-csr.json | cfssljson -bare ca
   return $?
 }
 
 function __provisionAdminCerts() {
   echo "Provisioning Kubernetes Admin Certificates"
   jq -n --arg C $C --arg L $L --arg ST $ST \
-      '{"CN": "admin","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:masters","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/admin-csr.json
+      '{"CN": "admin","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:masters","OU": "Kubernetes The Hard Way","ST": $ST}]}' > admin-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -28,7 +29,7 @@ function __provisionAdminCerts() {
 function __provisionControllerCerts() {
   echo "Provisioning Kubernetes Controller Certificates"
   jq -n --arg C $C --arg L $L --arg O $O --arg OU $OU --arg ST $ST \
-    '{"CN": "system:kube-controller-manager","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:kube-controller-manager","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/kube-controller-manager-csr.json
+    '{"CN": "system:kube-controller-manager","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:kube-controller-manager","OU": "Kubernetes The Hard Way","ST": $ST}]}' > kube-controller-manager-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -42,7 +43,7 @@ function __provisionControllerCerts() {
 function __provisionProxyClientCerts() {
   echo "Provisioning Kubernetes Proxy Client Certificates"
   jq -n --arg C $C --arg L $L --arg OU $OU --arg ST $ST \
-    '{"CN": "system:kube-proxy","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:node-proxier","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/kube-proxy-csr.json
+    '{"CN": "system:kube-proxy","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:node-proxier","OU": "Kubernetes The Hard Way","ST": $ST}]}' > kube-proxy-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -56,7 +57,7 @@ function __provisionProxyClientCerts() {
 function __provisionSchedulerCerts() {
   echo "Provisioning Kubernetes Scheduler Certificates"
   jq -n --arg C $C --arg L $L --arg ST $ST \
-    '{"CN": "system:kube-scheduler","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:kube-scheduler","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/kube-scheduler-csr.json
+    '{"CN": "system:kube-scheduler","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:kube-scheduler","OU": "Kubernetes The Hard Way","ST": $ST}]}' > kube-scheduler-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -70,7 +71,7 @@ function __provisionSchedulerCerts() {
 function __provisionAPICerts() {
   echo "Provisioning Kubernetes API Certificates"
   jq -n --arg C $C --arg L $L --arg ST $ST \
-    '{"CN": "kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/kubernetes-csr.json
+    '{"CN": "kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > kubernetes-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -86,7 +87,7 @@ function __provisionAPICerts() {
 function __provisionSAKey() {
   echo "Provisioning Kubernetes Service Account Key"
   jq -n --arg C $C --arg L $L --arg ST $ST \
-      '{"CN": "service-accounts","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/service-account-csr.json
+      '{"CN": "service-accounts","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > service-account-csr.json
 
   cfssl gencert \
     -ca=./ca.pem \
@@ -101,7 +102,7 @@ function __provisionClientCerts() {
 
   for worker in "${kubeWorkers[@]}"; do
     jq -n --arg C $C --arg L $L --arg ST $ST --arg worker $worker \
-    '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${kubeCertPath}/${worker}-csr.json
+    '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${KubeConfigTempPath}/${worker}-csr.json
 
     cfssl gencert \
       -ca=./ca.pem \
@@ -114,8 +115,9 @@ function __provisionClientCerts() {
   return $?
 }
 
-function _provisionCerts() {
+function main() {
   source ./clusterConfigs.txt
+  cd ${KubeConfigTempPath}
   __provisionCACerts
   __provisionAdminCerts
   __provisionControllerCerts
@@ -125,11 +127,3 @@ function _provisionCerts() {
   __provisionSAKey
   __provisionClientCerts
 }
-
-function distributeCerts() {
-  #statements
-  return $?
-}
-
-## Main Function for Testing ##
-_provisionCerts
