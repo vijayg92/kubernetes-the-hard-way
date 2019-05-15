@@ -16,14 +16,17 @@
 
 This is the main configuration file to deploy the whole cluster. It contains Kubernetes Nodes Details, Kubernetes Certificates Details, Kubernetes Controller Public IP, Local Host (Workstation) Details, Kubernetes ETCD Cluster Configs and so forth. 
 
-```text
+```bash
 ##################################################################
-################### Kubernetes Default Configs ###################
+################### Kubernetes Node Defination ###################
 ##################################################################
 kubeControllers=(kube-master01)
 kubeWorkers=(kube-worker01 kube-worker02)
 kubePublicIP=(10.74.255.110)
 etcdClusterDetails="kube-master01=https://10.240.0.10:2380"
+##################################################################
+############## Kubernetes Default Configs ########################
+##################################################################
 hostMachine="desktop.vgosai.redhat.com.users.ipa.redhat.com"
 hostMachineIP="10.65.144.128"
 KubeConfigTempPath=/tmp/kubernetes
@@ -35,7 +38,6 @@ L=DELHI
 O=DevOps
 OU=ENG
 ST=NEWDELHI
-##################################################################
 ##################################################################
 ```
 Kindly make sure to update the configuration in `clusterConfigs.txt` prior to deploy.

@@ -1,17 +1,22 @@
-### Kubernetes Nodes Details ###
+##################################################################
+################### Kubernetes Node Defination ###################
+##################################################################
 kubeControllers=(kube-master01)
 kubeWorkers=(kube-worker01 kube-worker02)
 kubePublicIP=(10.74.255.110)
 etcdClusterDetails="kube-master01=https://10.240.0.10:2380"
-
-### Kubernetes Default Configs ###
+##################################################################
+############## Kubernetes Default Configs ########################
+##################################################################
 hostMachine="desktop.vgosai.redhat.com.users.ipa.redhat.com"
 hostMachineIP="10.65.144.128"
 KubeConfigTempPath=/tmp/kubernetes
-
-### Kubernetes Certificates Details ###
+##################################################################
+############# Kubernetes Certificates Details ####################
+##################################################################
 C=IN
 L=DELHI
 O=DevOps
 OU=ENG
 ST=NEWDELHI
+##################################################################
