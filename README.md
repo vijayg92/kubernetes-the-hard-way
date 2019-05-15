@@ -14,23 +14,29 @@
 
 ## Configuration
 
-This is the main configuration file to deploy the whole cluster. It contains Kubernetes Nodes Details, Kubernetes Certificates Details, Local Host (Workstation) Details, Kubernetes ETCD Cluster Configs and so forth. 
+This is the main configuration file to deploy the whole cluster. It contains Kubernetes Nodes Details, Kubernetes Certificates Details, Kubernetes Controller Public IP, Local Host (Workstation) Details, Kubernetes ETCD Cluster Configs and so forth. 
 
 ```text
+##################################################################
+################### Kubernetes Default Configs ###################
+##################################################################
 kubeControllers=(kube-master01)
 kubeWorkers=(kube-worker01 kube-worker02)
 kubePublicIP=(10.74.255.110)
 etcdClusterDetails="kube-master01=https://10.240.0.10:2380"
-### Kubernetes Default Configs ###
 hostMachine="desktop.vgosai.redhat.com.users.ipa.redhat.com"
 hostMachineIP="10.65.144.128"
 KubeConfigTempPath=/tmp/kubernetes
-### Kubernetes Certificates Details ###
+##################################################################
+############# Kubernetes Certificates Details ####################
+##################################################################
 C=IN
 L=DELHI
 O=DevOps
 OU=ENG
 ST=NEWDELHI
+##################################################################
+##################################################################
 ```
 Kindly make sure to update the configuration in `clusterConfigs.txt` prior to deploy.
 
@@ -46,22 +52,28 @@ Kindly make sure to update the configuration in `clusterConfigs.txt` prior to de
 8. `bootstrapWorkerNodes.sh`: *Bootstraps Kubernetes nodes.*
 9. `validateCluster.sh`: *Validate deployment of the cluster.*
 10. `deployKubernetesTheHardway.sh`: *This is the main script which sequentially performs all the above steps to deploy the cluster in a hard way.*
+
 ## Installation
 
-1. Clone the repository -
+1. First you need to clone the repository:
 
 ```bash
 git clone https://github.com/vijayg92/kubernetes-the-hard-way.git
 cd kubernetes-the-hard-way
 ```
-2. Run `checkPrerequisites.sh` script to validate prerequisites.
+
+2. Then, run `checkPrerequisites.sh` script to validate prerequisites:
+
 ```bash
 ./checkPrerequisites.sh
 ```
-3. If step 2 works fine then deploy the cluster by running `deploy_kubernetes_the_hard_way.sh` script
+
+3. If step 2 works fine then only deploy the cluster by running `deploy_kubernetes_the_hard_way.sh` script:
+
 ```bash
 ./deployKubernetesTheHardway.sh
 ```
+
 4. Finally validation the cluster.
 
 ```bash
