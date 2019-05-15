@@ -8,8 +8,9 @@ for controller in "${kubeControllers[@]}"; do
 	ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${controller} "bash etcdSetup.sh 3.3.9 ${etcdClusterDetails}"
 	if [ $? -ne 0 ]; then
 		echo "Failed to Bootstrap ETCD ${controller} node"
-		exit -1
+		exit 1
 	fi
 done
+echo ""
 return $?
 }

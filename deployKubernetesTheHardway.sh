@@ -2,6 +2,7 @@
 
 ### Checking Prerequisites prior to deploying Kubernetes ###
 if [ -f ./checkPrerequisites.sh ]; then
+    echo ""
     echo "Checking initial Prerequisites before deploying the cluser"
     source ./checkPrerequisites.sh
     main

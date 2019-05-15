@@ -2,12 +2,10 @@
 set -e
 
 function main() {
-
   rpm --query wget || yum install -y wget
   rpm --query jq || yum install -y jq
-
   source ./clusterConfigs.txt
-
+    
   echo "Validating Host Machine Details"
   if [ `hostname -f` != "${hostMachine}" ]; then
       echo "Error - Kindly run this script from the local host ${hostMachine}"
