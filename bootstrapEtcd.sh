@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function main() {
-
-for controller in "${kubeControllers[@]}"; do
+echo ""
+for controller in "${CONTROL_PLANES[@]}"; do
 	echo "Bootstraping ETCD ${controller} node"
 	scp ./etcdSetup.sh root${controller}:~/
-	ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${controller} "bash etcdSetup.sh 3.3.9 ${etcdClusterDetails}"
+	ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${controller} "bash etcdSetup.sh 3.3.9 ${ETCD_CLUSTER_CONFIGS}"
 	if [ $? -ne 0 ]; then
 		echo "Failed to Bootstrap ETCD ${controller} node"
 		exit 1

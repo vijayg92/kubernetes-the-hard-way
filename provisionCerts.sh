@@ -82,7 +82,7 @@ function __provisionAPICerts() {
     -ca=./ca.pem \
     -ca-key=./ca-key.pem \
     -config=./ca-config.json \
-    -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,${kubePublicIP},127.0.0.1,kubernetes.default \
+    -hostname=${API_CERT_HOSTNAMES} \
     -profile=kubernetes \
     ./kubernetes-csr.json | cfssljson -bare kubernetes
   echo ""
@@ -105,15 +105,17 @@ function __provisionSAKey() {
 function __provisionClientCerts() {
   echo "Provisioning Kubernetes Client Certificates"
 
-  for worker in "${kubeWorkers[@]}"; do
+  for worker in "${KUBE_WORKERS[@]}"; do
     jq -n --arg C $C --arg L $L --arg ST $ST --arg worker $worker \
     '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${KubeConfigTempPath}/${worker}-csr.json
-
+    worker_ip = $(ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -i')
+    echo $worker_ip
+    
     cfssl gencert \
       -ca=./ca.pem \
       -ca-key=./ca-key.pem \
       -config=./ca-config.json \
-      -hostname=${worker},${EXTERNAL_IP},${INTERNAL_IP} \
+      -hostname=${worker},${worker_ip} \
       -profile=kubernetes \
       ${worker}-csr.json | cfssljson -bare ${worker}
   done
@@ -123,7 +125,7 @@ function __provisionClientCerts() {
 
 function main() {
   source ./clusterConfigs.txt
-  cd ${KubeConfigTempPath}
+  cd ${LOCAL_KUBE_CONFIG_PATH}
   __provisionCACerts
   __provisionAdminCerts
   __provisionControllerCerts

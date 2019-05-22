@@ -1,15 +1,15 @@
 #!/bin/bash
 
 function __generateKubeConfigs() {
+	echo ""
+	for worker in "${KUBE_WORKERS[@]}"; do
 
-	for worker in "${kubeWorkers[@]}"; do
-		
 		echo "Generating KubeConfigs for ${worker} node"
-		
+
 		kubectl config set-cluster kubernetes-the-hard-way \
 			--certificate-authority=ca.pem \
 			--embed-certs=true \
-			--server=https://${kubePublicIP}:6443 \
+			--server=https://${API_LB_IP}:6443 \
 			--kubeconfig=${worker}.kubeconfig
 
 		kubectl config set-credentials system:node:${worker} \
@@ -24,7 +24,7 @@ function __generateKubeConfigs() {
 			--kubeconfig=${worker}.kubeconfig
 
 		kubectl config use-context default --kubeconfig=${worker}.kubeconfig
-		
+
 		if [ ! -f "${worker}.kubeconfig" ]; then
 			echo "Failed to generate kubernetes ${worker}.kubeconfig"
 			exit 1
@@ -37,7 +37,7 @@ function __generateKubeConfigs() {
 	kubectl config set-cluster kubernetes-the-hard-way \
 		--certificate-authority=ca.pem \
 		--embed-certs=true \
-		--server=https://${kubePublicIP}:6443 \
+		--server=https://${API_LB_IP}:6443 \
 		--kubeconfig=kube-proxy.kubeconfig
 
 	kubectl config set-credentials system:kube-proxy \
@@ -102,6 +102,7 @@ function __generateKubeConfigs() {
 		--kubeconfig=kube-scheduler.kubeconfig
 
 	kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
+
 	if [ ! -f "./kube-scheduler.kubeconfig" ]; then
 		echo "Failed to generate kubernetes kube-scheduler.kubeconfig"
 		exit 1
@@ -139,7 +140,7 @@ function __generateKubeConfigs() {
 }
 
 function __distributeKubeWorkerConfigs() {
-	for worker in "${kubeWorkers[@]}"; do
+	for worker in "${KUBE_WORKERS[@]}"; do
 		echo "Copying kubernetes worker configs to ${worker} node"
 		scp ${worker}.kubeconfig kube-proxy.kubeconfig root@${worker}:~/
 		if [ $? -ne 0 ]; then
@@ -175,7 +176,7 @@ EOF
 }
 
 function __distributeKubeMasterConfigs() {
-	for controller in "${kubeControllers[@]}"; do
+	for controller in "${CONTROL_PLANES[@]}"; do
 		echo "Copying kubernetes controller configs to ${controller} node"
 		scp ./encryption-config.yaml ./admin.kubeconfig ./kube-controller-manager.kubeconfig ./kube-scheduler.kubeconfig root${controller}:~/
 		if [ $? -ne 0 ]; then
@@ -189,7 +190,7 @@ function __distributeKubeMasterConfigs() {
 
 function main() {
   source ./clusterConfigs.txt
-  cd ${KubeConfigTempPath}
+  cd ${LOCAL_KUBE_CONFIG_PATH}
   __generateKubeConfigs
   __generatingDataEncryptionConfig
   __distributeKubeWorkerConfigs

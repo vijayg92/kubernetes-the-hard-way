@@ -27,7 +27,7 @@ fi
 
 ### Generating & Distrubuting of Kubernetes Config files ###
 if [ -f ./generateKubeConfigs.sh ]; then
-    echo "Generating & Distributing Kubernetes Configs files on Kubernetes Worker and Master nodes"
+    echo "Generating & Distributing Kubernetes Configs files on Kubernetes Master, LB Server and nodes"
     source ./generateKubeConfigs.sh
 	main
 	echo ""

@@ -1,13 +1,13 @@
 #!/bin/bash
 
 ETCD_VERSION=$1
-ETCD_CLUSTER_DETAILS=$2
+ETCD_CLUSTER_CONFIGS=$2
 ETCD_NAME=$(hostame -s)
-INTERNAL_IP=$(hostname -i)  
+INTERNAL_IP=$(hostname -i)
 
 if [ $# -eq 0 ]; then
     echo "Please provide valid arguments!!"
-    echo "Usage: etcdSetup.sh ETCD_VERSION ETCD_CLUSTER_DETAILS"
+    echo "Usage: etcdSetup.sh ETCD_VERSION ETCD_CLUSTER_CONFIGS"
     exit -1
 fi
 
@@ -41,7 +41,7 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster ${ETCD_CLUSTER_DETAILS} \\
+  --initial-cluster ${ETCD_CLUSTER_CONFIGS} \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
@@ -60,4 +60,3 @@ ETCDCTL_API=3 etcdctl member list \
   --cacert=/etc/etcd/ca.pem \
   --cert=/etc/etcd/kubernetes.pem \
   --key=/etc/etcd/kubernetes-key.pem
-
