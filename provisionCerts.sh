@@ -107,10 +107,10 @@ function __provisionClientCerts() {
 
   for worker in "${KUBE_WORKERS[@]}"; do
     jq -n --arg C $C --arg L $L --arg ST $ST --arg worker $worker \
-    '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${KubeConfigTempPath}/${worker}-csr.json
-    worker_ip = $(ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -i')
+    '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${worker}-csr.json
+    worker_ip=`ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -I'`
     echo $worker_ip
-    
+
     cfssl gencert \
       -ca=./ca.pem \
       -ca-key=./ca-key.pem \
