@@ -4,10 +4,11 @@
 
 ## Architecture
 
-Kubernetes Control Plane (Masters) : 2
-Kubernetes Worker Nodes (Minions) : 3
-Kubernetes API LoadBalancer : 1
-Provisoner Host (Local Machine): 1
+1. Kubernetes Control Plane (Masters) : 2
+2. Kubernetes Worker Nodes (Minions) : 3
+3. Kubernetes API LoadBalancer : 1
+4. Provisoner Host (Local Machine): 1
+
 
 ## Prerequisites
 
