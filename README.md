@@ -1,4 +1,4 @@
-# Kubernetes the hard way
+# Kubernetes the Hard Way
 
 *A simple & real quick deployment of Kubernetes HA Cluster based on "Kubernetes the Hard Way"*
 
@@ -26,25 +26,25 @@ This is the main configuration file to deploy the whole cluster. It contains Kub
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| CONTROL_PLANES | An array of Kubernetes Masters' FQDN. | string | ((kube-master01.gsslab.pnq2.redhat.com kube-master02.gsslab.pnq2.redhat.com)) | yes |
-| CONTROL_PLANES_IPS | An array of Kubernetes Master's IP Address. | string | ((10.74.250.10 10.74.254.170)) | yes |
-| ETCD_CLUSTER_CONFIGS | Endpoints of ETCD Cluster. | string | ("https://10.74.250.10:2379,https://10.74.254.170:2379") | yes |
-| CLUSTER_CIDR | CIDR range for allocating IP addresses within Kubernetes Cluster | string | ("10.200.0.0/16") | yes |
-| SERVICE_CLUSTER_CIDR | CIDR range for allocating IP addresses for Kubernetes Services | string | ("10.32.0.0/24") | yes |
-| POD_CIDR | CIDR range for allocating IP addresses within Pods | string | ("10.200.0.0/16") | yes |
-| KUBE_API_LB | Kubernetes API LoadBalancer FQDN | string | ("kube-api-lb.gsslab.pnq2.redhat.com") | yes |
-| API_LB_IP | Kubernetes API LoadBalancer IP | string | ("10.200.0.0/16") | yes |
-| API_CERT_HOSTNAMES | List of allowed hosts and ips of Kubernetes nodes to access API server. | string | ("10.32.0.1,10.74.250.10,kube-master01.gsslab.pnq2.redhat.com,10.74.254.170,kube-master02.gsslab.pnq2.redhat.com,10.74.225.110,kube-api-lb.gsslab.pnq2.redhat.com,127.0.0.1,kubernetes.default") | yes |
-| KUBE_WORKERS | An array of Kubernetes Workers' FQDN. | string | ((kube-worker01.gsslab.pnq2.redhat.com kube-worker02.gsslab.pnq2.redhat.com kube-worker03.gsslab.pnq2.redhat.com)) | yes |
-| KUBE_WORKERS_IPS | An array of Kubernetes Workers' IP. | string | ((10.74.253.199 10.74.250.141 10.74.249.90)) | yes |
-| LOCAL_HOST | Provisioner (localhost) from which the deployment script will be run. | string | (desktop.vgosai.redhat.com.users.ipa.redhat.com") | yes |
-| LOCAL_HOST_IP | IP Address of the Provisioner. | string | ("10.65.144.128") | yes |
-| LOCAL_KUBE_CONFIG_PATH | Temporarily directory on Provisioner machine to keep Kubernetes Certs, Configs, Keys and so forth. | string | (/tmp/kubernetes) | yes |
-| C | Certificate Object: Country, default INDIA | string | (IN) | yes |
-| L | Certificate Object: Locality, default DELHI | string | (DELHI) | yes |
-| O | Certificate Object: Orgnization, default DEVOPS | string | (DevOps) | yes |
-| OU | Certificate Object: Orgnization Unit, default ENGINEERING | string | (ENG) | yes |
-| ST | Certificate Object: State, default NEW DELHI | string | (NEWDELHI) | yes |
+| CONTROL_PLANES | An array of Kubernetes Masters' FQDN. | array | (kube-master01.gsslab.pnq2.redhat.com kube-master02.gsslab.pnq2.redhat.com) | yes |
+| CONTROL_PLANES_IPS | An array of Kubernetes Master's IP Address. | array | (10.74.250.10 10.74.254.170) | yes |
+| ETCD_CLUSTER_CONFIGS | Endpoints of ETCD Cluster. | string | "https://10.74.250.10:2379,https://10.74.254.170:2379" | yes |
+| CLUSTER_CIDR | CIDR range for allocating IP addresses within Kubernetes Cluster | string | "10.200.0.0/16" | yes |
+| SERVICE_CLUSTER_CIDR | CIDR range for allocating IP addresses for Kubernetes Services | string | "10.32.0.0/24" | yes |
+| POD_CIDR | CIDR range for allocating IP addresses within Pods | string | "10.200.0.0/16" | yes |
+| KUBE_API_LB | Kubernetes API LoadBalancer FQDN | string | "kube-api-lb.gsslab.pnq2.redhat.com" | yes |
+| API_LB_IP | Kubernetes API LoadBalancer IP | string | "10.200.0.0/16" | yes |
+| API_CERT_HOSTNAMES | List of allowed hosts and ips of Kubernetes nodes to access API server. | string | "10.32.0.1,10.74.250.10,kube-master01.gsslab.pnq2.redhat.com,10.74.254.170,kube-master02.gsslab.pnq2.redhat.com,10.74.225.110,kube-api-lb.gsslab.pnq2.redhat.com,127.0.0.1,kubernetes.default" | yes |
+| KUBE_WORKERS | An array of Kubernetes Workers' FQDN. | array | (kube-worker01.gsslab.pnq2.redhat.com kube-worker02.gsslab.pnq2.redhat.com kube-worker03.gsslab.pnq2.redhat.com) | yes |
+| KUBE_WORKERS_IPS | An array of Kubernetes Workers' IP. | array | (10.74.253.199 10.74.250.141 10.74.249.90) | yes |
+| LOCAL_HOST | Provisioner (localhost) from which the deployment script will be run. | string | "desktop.vgosai.redhat.com.users.ipa.redhat.com" | yes |
+| LOCAL_HOST_IP | IP Address of the Provisioner. | string | "10.65.144.128" | yes |
+| LOCAL_KUBE_CONFIG_PATH | Temporarily directory on Provisioner machine to keep Kubernetes Certs, Configs, Keys and so forth. | string | "/tmp/kubernetes" | yes |
+| C | Certificate Object: Country, default INDIA | string | "IN" | yes |
+| L | Certificate Object: Locality, default DELHI | string | "DELHI" | yes |
+| O | Certificate Object: Orgnization, default DEVOPS | string | "DevOps" | yes |
+| OU | Certificate Object: Orgnization Unit, default ENGINEERING | string | "ENG" | yes |
+| ST | Certificate Object: State, default NEW DELHI | string | "NEWDELHI" | yes |
 
 * Sample Configuration which I used for deploying cluster.
 
