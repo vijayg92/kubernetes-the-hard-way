@@ -8,35 +8,35 @@ function main() {
 
   echo ""
   echo "Check 1 : Kubernetes Master Configs"
-  if [[ -z "${CONTROL_PLANES}" && -z "${CONTROL_PLANES_IPS}" && -z "${ETCD_CLUSTER_ENDPOINTS}" && -z "${ETCD_CLUSTER_CONFIGS}" && -z "${CLUSTER_CIDR}" && -z "${SERVICE_CLUSTER_CIDR}" && -z "${POD_CIDR}" ]]; then
+  if [[ -z "${CONTROL_PLANES}" || -z "${CONTROL_PLANES_IPS}" || -z "${ETCD_CLUSTER_ENDPOINTS}" || -z "${ETCD_CLUSTER_CONFIGS}" || -z "${CLUSTER_CIDR}" || -z "${SERVICE_CLUSTER_CIDR}" || -z "${POD_CIDR}" ]]; then
       echo "Error: Kubernet Master Configs Must Be Specified!!"
       exit 1
   fi
 
   echo ""
   echo "Check 2 : Kubernetes API Load Balancer Configs"
-  if [[ -z "${KUBE_API_LB}" && -z "${API_LB_IP}" && -z "${API_CERT_HOSTNAMES}" ]]; then
+  if [[ -z "${KUBE_API_LB}" || -z "${API_LB_IP}" || -z "${API_CERT_HOSTNAMES}" ]]; then
       echo "Error: Kubernetes API Load Balancer Configs Must Be Specified!!"
       exit 1
   fi
 
   echo ""
   echo "Check 3 : Kubernetes Worker Nodes Configs"
-  if [[ -z "${KUBE_WORKERS}" && -z "${KUBE_WORKERS_IPS}" ]]; then
+  if [[ -z "${KUBE_WORKERS}" || -z "${KUBE_WORKERS_IPS}" ]]; then
       echo "Error: Kubernet Worker Nodes Configs Must Be Specified!!"
       exit 1
   fi
 
   echo ""
   echo "Check 4 : Provisoner Host Configs"
-  if [[ -z "${LOCAL_HOST}" && -z "${LOCAL_HOST_IP}" && -z "${LOCAL_KUBE_CONFIG_PATH}" ]]; then
+  if [[ -z "${LOCAL_HOST}" || -z "${LOCAL_HOST_IP}" || -z "${LOCAL_KUBE_CONFIG_PATH}" ]]; then
       echo "Error: Kubernet Provisoner Host Configs Must Be Specified!!"
       exit 1
   fi
 
   echo ""
   echo "Check 5 : Kubernetes Certificates Details"
-  if [[ -z "${C}" && -z "${L}" && -z "${O}" && -z "${OU}" && -z "${ST}" ]]; then
+  if [[ -z "${C}" || -z "${L}" || -z "${O}" || -z "${OU}" || -z "${ST}" ]]; then
       echo "Error: Kubernetes Certificates Configs Must Be Specified!!"
       exit 1
   fi
@@ -45,7 +45,6 @@ function main() {
   echo "Checking Master Configs"
   rpm --query wget || yum install -y wget
   rpm --query jq || yum install -y jq
-  source ./clusterConfigs.txt
 
   echo ""
   echo "Validating Provisioner (Host Machine) Configs : ${LOCAL_HOST}"
