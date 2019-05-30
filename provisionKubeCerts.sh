@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e 
 
 function __provisionCACerts() {
   echo "Provisioning Kubernetes CA Certificates"
@@ -9,8 +9,8 @@ function __provisionCACerts() {
       '{"CN": "Kubernetes","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": $O,"OU": $OU,"ST": $ST}]}' > ca-csr.json
 
   cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+  echo "Successfully Provisioned CA Certificates"
   echo ""
-  return $?
 }
 
 function __provisionAdminCerts() {
@@ -24,8 +24,8 @@ function __provisionAdminCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./admin-csr.json | cfssljson -bare admin
+  echo "Successfully Provisioned Admin Certificates"
   echo ""
-  return $?
 }
 
 function __provisionControllerCerts() {
@@ -39,8 +39,8 @@ function __provisionControllerCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+  echo "Successfully Provisioned Controller Certificates"
   echo ""
-  return $?
 }
 
 function __provisionProxyClientCerts() {
@@ -54,8 +54,8 @@ function __provisionProxyClientCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-proxy-csr.json | cfssljson -bare kube-proxy
+  echo "Successfully Provisioned Kebe Proxy Client Certificates"
   echo ""
-  return $?
 }
 
 function __provisionSchedulerCerts() {
@@ -69,8 +69,8 @@ function __provisionSchedulerCerts() {
     -config=./ca-config.json \
     -profile=kubernetes \
     ./kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+  echo "Successfully Provisioned Scheduler Certificates"
   echo ""
-  return $?
 }
 
 function __provisionAPICerts() {
@@ -85,21 +85,23 @@ function __provisionAPICerts() {
     -hostname=${API_CERT_HOSTNAMES} \
     -profile=kubernetes \
     ./kubernetes-csr.json | cfssljson -bare kubernetes
+  echo "Successfully Provisioned Kubernetes API Certificates"
   echo ""
-  return $?
 }
 
 function __provisionSAKey() {
   echo "Provisioning Kubernetes Service Account Key"
   jq -n --arg C $C --arg L $L --arg ST $ST \
       '{"CN": "service-accounts","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "Kubernetes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > service-account-csr.json
-  echo ""
+
   cfssl gencert \
     -ca=./ca.pem \
     -ca-key=./ca-key.pem \
     -config=./ca-config.json \
     -profile=kubernetes \
     ./service-account-csr.json | cfssljson -bare service-account
+  echo "Successfully Provisioned Service Account Key"
+  echo ""
 }
 
 function __provisionClientCerts() {
@@ -109,7 +111,6 @@ function __provisionClientCerts() {
     jq -n --arg C $C --arg L $L --arg ST $ST --arg worker $worker \
     '{"CN": "system:node:$worker","key": {"algo": "rsa","size": 2048},"names": [{"C": $C,"L": $L,"O": "system:nodes","OU": "Kubernetes The Hard Way","ST": $ST}]}' > ${worker}-csr.json
     worker_ip=`ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no -l root ${worker} 'hostname -I'`
-    echo $worker_ip
 
     cfssl gencert \
       -ca=./ca.pem \
@@ -119,11 +120,41 @@ function __provisionClientCerts() {
       -profile=kubernetes \
       ${worker}-csr.json | cfssljson -bare ${worker}
   done
+  echo "Successfully Provisioned Kubernetes Client Certificates"
   echo ""
-  return $?
+}
+
+function __distributeCertsFilesOnWorkers() {
+
+  echo "Distributing Certificates on Kubernetes Worker Nodes"
+  for worker in "${KUBE_WORKERS[@]}"; do
+    scp ./ca.pem ${worker}-key.pem ${worker}.pem root@${worker}:~/
+    if [ $? -ne 0 ]; then
+      echo "Failed to copy certs on ${worker} node"
+      exit 1
+    fi
+  done
+  echo "Successfully Distributed Certificates on Kubernetes Worker Nodes"
+  echo ""
+}
+
+
+function __distributeCertsFilesOnController() {
+
+  echo "Distributing Certificates on Kubernetes Master (Controller) Nodes"
+  for controller in "${CONTROL_PLANES[@]}"; do
+    scp ./ca.pem ./ca-key.pem ./kubernetes-key.pem ./kubernetes.pem ./service-account-key.pem ./service-account.pem root@${controller}:~/
+    if [ $? -ne 0 ]; then
+      echo "Failed to copy configs to ${controller} node"
+      exit 1
+    fi
+  done
+  echo "Successfully Distributed Certificates on Kubernetes Master Nodes"
+  echo ""
 }
 
 function main() {
+  getWorkingDirectory=$(pwd)
   source ./clusterConfigs.txt
   cd ${LOCAL_KUBE_CONFIG_PATH}
   __provisionCACerts
@@ -134,4 +165,7 @@ function main() {
   __provisionAPICerts
   __provisionSAKey
   __provisionClientCerts
+  __distributeCertsFilesOnWorkers
+  __distributeCertsFilesOnController
+  cd ${getWorkingDirectory}
 }

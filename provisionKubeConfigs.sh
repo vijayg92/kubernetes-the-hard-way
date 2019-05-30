@@ -1,9 +1,9 @@
 #!/bin/bash
+set -e 
 
 function __generateKubeConfigs() {
 	echo ""
 	for worker in "${KUBE_WORKERS[@]}"; do
-
 		echo "Generating KubeConfigs for ${worker} node"
 
 		kubectl config set-cluster kubernetes-the-hard-way \
@@ -22,6 +22,7 @@ function __generateKubeConfigs() {
 			--cluster=kubernetes-the-hard-way \
 			--user=system:node:${worker} \
 			--kubeconfig=${worker}.kubeconfig
+		echo ""
 
 		kubectl config use-context default --kubeconfig=${worker}.kubeconfig
 
@@ -75,6 +76,7 @@ function __generateKubeConfigs() {
 		--cluster=kubernetes-the-hard-way \
 		--user=system:kube-controller-manager \
 		--kubeconfig=kube-controller-manager.kubeconfig
+	echo ""
 
 	kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconfig
 	if [ ! -f "./kube-controller-manager.kubeconfig" ]; then
@@ -100,6 +102,7 @@ function __generateKubeConfigs() {
 		--cluster=kubernetes-the-hard-way \
 		--user=system:kube-scheduler \
 		--kubeconfig=kube-scheduler.kubeconfig
+	echo ""
 
 	kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
 
@@ -126,6 +129,7 @@ function __generateKubeConfigs() {
 		--cluster=kubernetes-the-hard-way \
 		--user=admin \
 		--kubeconfig=admin.kubeconfig
+	echo ""
 
 	kubectl config use-context default --kubeconfig=admin.kubeconfig
 
@@ -133,10 +137,38 @@ function __generateKubeConfigs() {
 		echo "Failed to generate kubernetes admin.kubeconfig"
 		exit 1
 	fi
-	echo ""
 	echo "Config files have been sucessfully generated!!"
 	echo ""
-	return $?
+}
+
+function __generatingDataEncryptionConfig() {
+
+	echo "Creating Encryption Key"
+	echo ""
+
+	ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
+	if [ ! -f encryption-config.yaml ]; then
+		cat <<-EOF | tee encryption-config.yaml
+		kind: EncryptionConfig
+		apiVersion: v1
+		resources:
+		  - resources:
+		      - secrets
+		    providers:
+		      - aescbc:
+		          keys:
+		            - name: key1
+		              secret: ${ENCRYPTION_KEY}
+		      - identity: {}
+		EOF
+	fi
+
+	if [ ! -f "./encryption-config.yaml" ]; then
+		echo "Failed to generate encryption-config.yaml"
+		exit 1
+	fi
+	echo "Successfully Created EncryptionConfig"
+	echo ""
 }
 
 function __distributeKubeWorkerConfigs() {
@@ -148,51 +180,31 @@ function __distributeKubeWorkerConfigs() {
 			exit 1
 		fi
   	done
+  	echo "Sucessfully Copied Configs on Kubernetes Worker Nodes"
   	echo ""
-  	return $?
-}
-
-function __generatingDataEncryptionConfig() {
-	ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
-	cat > encryption-config.yaml <<EOF
-kind: EncryptionConfig
-apiVersion: v1
-resources:
-  - resources:
-      - secrets
-    providers:
-      - aescbc:
-          keys:
-            - name: key1
-              secret: ${ENCRYPTION_KEY}
-      - identity: {}
-EOF
-	if [ ! -f "./encryption-config.yaml" ]; then
-		echo "Failed to generate encryption-config.yaml"
-		exit 1
-	fi
-	echo ""
-	return $?
 }
 
 function __distributeKubeMasterConfigs() {
+	echo ""
 	for controller in "${CONTROL_PLANES[@]}"; do
 		echo "Copying kubernetes controller configs to ${controller} node"
-		scp ./encryption-config.yaml ./admin.kubeconfig ./kube-controller-manager.kubeconfig ./kube-scheduler.kubeconfig root${controller}:~/
+		scp ./encryption-config.yaml ./admin.kubeconfig ./kube-controller-manager.kubeconfig ./kube-scheduler.kubeconfig root@${controller}:~/
 		if [ $? -ne 0 ]; then
 			echo "Failed to copy configs to ${controller} node"
 			exit 1
 		fi
  	done
+ 	echo "Sucessfully Copied Configs on Kubernetes Master (Controller) Nodes"
  	echo ""
- 	return $?
 }
 
 function main() {
-  source ./clusterConfigs.txt
-  cd ${LOCAL_KUBE_CONFIG_PATH}
-  __generateKubeConfigs
-  __generatingDataEncryptionConfig
-  __distributeKubeWorkerConfigs
-  __distributeKubeMasterConfigs
+	getWorkingDirectory=$(pwd)
+  	source ./clusterConfigs.txt
+  	cd ${LOCAL_KUBE_CONFIG_PATH}
+  	__generateKubeConfigs
+  	__generatingDataEncryptionConfig
+  	__distributeKubeWorkerConfigs
+  	__distributeKubeMasterConfigs
+  	cd ${getWorkingDirectory}
 }

@@ -1,6 +1,8 @@
 #!/bin/bash
+set -e
 
-function smokeTest() {
-
-	
+function smoketest() {
+	echo ""
+	echo "Starting Validation1 : kubelet"
+	echo ""
 }
